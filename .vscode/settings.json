@@ -1,0 +1,6 @@
+{
+  "editor.fontSize": 14,
+  "editor.formatOnSave": true,
+  "python.defaultInterpreterPath": "/usr/local/bin/python",
+  "terminal.integrated.defaultProfile.linux": "bash"
+}

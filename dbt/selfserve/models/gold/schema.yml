@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: gold_sales_by_month
+    description: "Monthly revenue by region and category. Grain: month x region x category."
+    columns:
+      - name: revenue
+        description: "Net revenue from completed order lines."
+  - name: gold_top_products
+    description: "Product leaderboard by revenue and units. Grain: one row per SKU."

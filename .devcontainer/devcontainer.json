@@ -1,0 +1,25 @@
+{
+  "name": "selfserve-bi-agent",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/azure-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "forwardPorts": [3000, 5432, 8501],
+  "portsAttributes": {
+    "3000": { "label": "Metabase" },
+    "8501": { "label": "Agent (Streamlit)" },
+    "5432": { "label": "Postgres" }
+  },
+  "postCreateCommand": "pip install --upgrade pip && pip install -r requirements.txt",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "innoverio.vscode-dbt-power-user",
+        "ms-azuretools.vscode-azurefunctions",
+        "mongodb.mongodb-vscode"
+      ]
+    }
+  }
+}

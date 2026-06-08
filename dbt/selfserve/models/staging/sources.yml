@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: bronze
+    schema: bronze
+    description: "Raw collections landed from MongoDB via ADLS."
+    tables:
+      - name: products
+      - name: customers
+      - name: order_lines

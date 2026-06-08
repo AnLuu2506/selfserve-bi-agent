@@ -1,0 +1,49 @@
+# Runs the persistent platform. On Codespaces use it for local testing;
+# on the Azure VM this is what stays up so dashboards + agent have a public URL.
+# Footprint is ~3-4 GB RAM, comfortable on a B2ms (2 vCPU / 8 GB).
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${PGDATABASE:-warehouse}
+      POSTGRES_USER: ${PGUSER:-bi}
+      POSTGRES_PASSWORD: ${PGPASSWORD:-change-me}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PGUSER:-bi}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  metabase:
+    image: metabase/metabase:latest
+    ports:
+      - "3000:3000"
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: ${PGDATABASE:-warehouse}
+      MB_DB_PORT: 5432
+      MB_DB_USER: ${PGUSER:-bi}
+      MB_DB_PASS: ${PGPASSWORD:-change-me}
+      MB_DB_HOST: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  agent:
+    build: ./agent
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    environment:
+      PGHOST: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:

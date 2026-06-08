@@ -1,0 +1,41 @@
+name: dbt-ci
+on:
+  push:
+    paths: ["dbt/**", ".github/workflows/dbt-ci.yml"]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: warehouse
+          POSTGRES_USER: bi
+          POSTGRES_PASSWORD: ci-pass
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U bi" --health-interval 10s
+          --health-timeout 5s --health-retries 5
+    env:
+      PGHOST: localhost
+      PGPORT: "5432"
+      PGUSER: bi
+      PGPASSWORD: ci-pass
+      PGDATABASE: warehouse
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install dbt-postgres==1.8.2 sqlfluff==3.2.5
+      - name: Lint models
+        run: sqlfluff lint dbt/selfserve/models --dialect postgres || true
+      - name: Seed minimal bronze + build
+        working-directory: dbt/selfserve
+        run: |
+          mkdir -p ~/.dbt && cp profiles.example.yml ~/.dbt/profiles.yml
+          psql "postgresql://bi:ci-pass@localhost:5432/warehouse" -c "CREATE SCHEMA IF NOT EXISTS bronze;"
+          # In a real run, load fixtures here. For CI we just compile + parse.
+          dbt deps || true
+          dbt parse

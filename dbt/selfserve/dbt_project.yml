@@ -1,0 +1,17 @@
+name: "selfserve"
+version: "1.0.0"
+profile: "selfserve"
+
+model-paths: ["models"]
+
+models:
+  selfserve:
+    staging:
+      +materialized: view
+      +schema: staging
+    silver:
+      +materialized: table
+      +schema: silver
+    gold:
+      +materialized: table
+      +schema: gold
